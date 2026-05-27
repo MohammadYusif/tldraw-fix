@@ -385,3 +385,37 @@ describe('Vec.Average', () => {
 		expect(Vec.Average([])).toMatchObject(new Vec(0, 0))
 	})
 })
+
+describe('Vec.Slope', () => {
+	it('returns NaN for a vertical line (A.x === B.x)', () => {
+		expect(Vec.Slope(new Vec(10, 0), new Vec(10, 50))).toBeNaN()
+	})
+
+	it('returns a finite slope for a non-vertical line even when A.x coincidentally equals B.y', () => {
+		// A.x (10) === B.y (10) was wrongly triggering the old guard
+		expect(Vec.Slope(new Vec(10, 0), new Vec(5, 10))).toBeCloseTo(-2)
+	})
+
+	it('returns the correct slope for a regular line', () => {
+		expect(Vec.Slope(new Vec(0, 0), new Vec(4, 2))).toBeCloseTo(0.5)
+	})
+})
+
+describe('Vec.prototype.cross', () => {
+	it('matches Vec.Cross for the same inputs', () => {
+		const a = new Vec(1, 2, 3)
+		const v = { x: 4, y: 5, z: 6 }
+		const instance = new Vec(1, 2, 3).cross(v)
+		const stat = Vec.Cross(a, v)
+		expect(instance.x).toBeCloseTo(stat.x)
+		expect(instance.y).toBeCloseTo(stat.y)
+	})
+
+	it('computes the correct y component without using the already-mutated x', () => {
+		// Before the fix: this.y = 3*4 - (-3)*6 = 30 (wrong)
+		// After the fix:  this.y = 3*4 - 1*6    = 6  (correct)
+		const result = new Vec(1, 2, 3).cross({ x: 4, y: 5, z: 6 })
+		expect(result.x).toBeCloseTo(-3)
+		expect(result.y).toBeCloseTo(6)
+	})
+})

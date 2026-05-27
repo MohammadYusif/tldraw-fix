@@ -72,4 +72,42 @@ describe('Timers', () => {
 
 		vi.unstubAllGlobals()
 	})
+
+	it('forwards extra arguments to the handler as individual values, not as an array', () => {
+		const timers = new Timers()
+		const mockSetTimeout = vi.fn().mockReturnValue(1)
+		const mockSetInterval = vi.fn().mockReturnValue(2)
+
+		vi.stubGlobal('setTimeout', mockSetTimeout)
+		vi.stubGlobal('setInterval', mockSetInterval)
+
+		const handler = vi.fn()
+		timers.setTimeout('ctx', handler, 0, 'a', 'b')
+		timers.setInterval('ctx', handler, 0, 'x', 'y')
+
+		// The native calls must receive the args spread, not wrapped in an array
+		expect(mockSetTimeout).toHaveBeenCalledWith(handler, 0, 'a', 'b')
+		expect(mockSetInterval).toHaveBeenCalledWith(handler, 0, 'x', 'y')
+
+		vi.unstubAllGlobals()
+	})
+
+	it('forwards extra arguments via forContext wrappers as individual values', () => {
+		const timers = new Timers()
+		const mockSetTimeout = vi.fn().mockReturnValue(1)
+		const mockSetInterval = vi.fn().mockReturnValue(2)
+
+		vi.stubGlobal('setTimeout', mockSetTimeout)
+		vi.stubGlobal('setInterval', mockSetInterval)
+
+		const ctx = timers.forContext('ctx')
+		const handler = vi.fn()
+		ctx.setTimeout(handler, 0, 'a', 'b')
+		ctx.setInterval(handler, 0, 'x', 'y')
+
+		expect(mockSetTimeout).toHaveBeenCalledWith(handler, 0, 'a', 'b')
+		expect(mockSetInterval).toHaveBeenCalledWith(handler, 0, 'x', 'y')
+
+		vi.unstubAllGlobals()
+	})
 })

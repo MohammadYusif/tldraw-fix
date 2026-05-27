@@ -58,7 +58,7 @@ export class Timers {
 	 * @public
 	 */
 	setTimeout(contextId: string, handler: TimerHandler, timeout?: number, ...args: any[]): number {
-		const id = window.setTimeout(handler, timeout, args)
+		const id = window.setTimeout(handler, timeout, ...args)
 		const current = this.timeouts.get(contextId) ?? []
 		this.timeouts.set(contextId, [...current, id])
 		return id
@@ -80,7 +80,7 @@ export class Timers {
 	 * @public
 	 */
 	setInterval(contextId: string, handler: TimerHandler, timeout?: number, ...args: any[]): number {
-		const id = window.setInterval(handler, timeout, args)
+		const id = window.setInterval(handler, timeout, ...args)
 		const current = this.intervals.get(contextId) ?? []
 		this.intervals.set(contextId, [...current, id])
 		return id
@@ -176,9 +176,9 @@ export class Timers {
 	forContext(contextId: string) {
 		return {
 			setTimeout: (handler: TimerHandler, timeout?: number, ...args: any[]) =>
-				this.setTimeout(contextId, handler, timeout, args),
+				this.setTimeout(contextId, handler, timeout, ...args),
 			setInterval: (handler: TimerHandler, timeout?: number, ...args: any[]) =>
-				this.setInterval(contextId, handler, timeout, args),
+				this.setInterval(contextId, handler, timeout, ...args),
 			requestAnimationFrame: (callback: FrameRequestCallback) =>
 				this.requestAnimationFrame(contextId, callback),
 			dispose: () => this.dispose(contextId),
